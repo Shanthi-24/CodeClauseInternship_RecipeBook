@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f8f8f8;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    input, textarea, button {
+      width: 100%;w
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #28a745;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
+    }
+    .recipes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+    .card {
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .actions button {
+      width: 48%;
+      font-size: 14px;
+    }
+    .edit { background: #007bff; }
+    .edit:hover { background: #0056b3; }
+    .delete { background: #dc3545; }
+    .delete:hover { background: #a71d2a; }
+  </style>
+</head>
+<body>
+
+  <h1>🍲 My Recipe App</h1>
+
+  <!-- Recipe Form -->
+  <form id="recipeForm">
+    <input type="text" id="title" placeholder="Recipe Title" required>
+    <textarea id="ingredients" placeholder="Ingredients (comma separated)" required></textarea>
+    <textarea id="instructions" placeholder="Instructions" required></textarea>
+    <input type="text" id="image" placeholder="Image URL (optional)">
+    <button type="submit">Add Recipe</button>
+  </form>
+
+  <!-- Recipes List -->
+  <div class="recipes" id="recipeList"></div>
+
+  <script>
+    const form = document.getElementById('recipeForm');
+    const recipeList = document.getElementById('recipeList');
+    let editIndex = null;
+
+    // Load recipes from local storage
+    let recipes = JSON.parse(localStorage.getItem('recipes')) || [];
+
+    function displayRecipes() {
+      recipeList.innerHTML = "";
+      recipes.forEach((recipe, index) => {
+        const card = document.createElement('div');
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${recipe.image || 'https://via.placeholder.com/300'}" alt="Recipe Image">
+          <h3>${recipe.title}</h3>
+          <p><b>Ingredients:</b> ${recipe.ingredients}</p>
+          <p><b>Instructions:</b> ${recipe.instructions}</p>
+          <div class="actions">
+            <button class="edit" onclick="editRecipe(${index})">Edit</button>
+            <button class="delete" onclick="deleteRecipe(${index})">Delete</button>
+          </div>
+        `;
+        recipeList.appendChild(card);
+      });
+      localStorage.setItem('recipes', JSON.stringify(recipes));
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newRecipe = {
+        title: document.getElementById('title').value,
+        ingredients: document.getElementById('ingredients').value,
+        instructions: document.getElementById('instructions').value,
+        image: document.getElementById('image').value
+      };
+
+      if (editIndex !== null) {
+        recipes[editIndex] = newRecipe;
+        editIndex = null;
+      } else {
+        recipes.push(newRecipe);
+      }
+
+      form.reset();
+      displayRecipes();
+    });
+
+    function editRecipe(index) {
+      const recipe = recipes[index];
+      document.getElementById('title').value = recipe.title;
+      document.getElementById('ingredients').value = recipe.ingredients;
+      document.getElementById('instructions').value = recipe.instructions;
+      document.getElementById('image').value = recipe.image;
+      editIndex = index;
+    }
+
+    function deleteRecipe(index) {
+      recipes.splice(index, 1);
+      displayRecipes();
+    }
+
+    // Initial display
+    displayRecipes();
+  </script>
+</body>
+</html>
